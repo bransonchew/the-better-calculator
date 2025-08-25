@@ -1,3 +1,5 @@
+import GitHub from '@/components/logo/github'
+
 export default function Footer() {
   return (
     <footer className="w-full border-t pt-6 pb-8 mt-10">
@@ -19,10 +21,13 @@ export default function Footer() {
           href="https://github.com/bransonchew/the-better-calculator"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-sm hover:underline text-muted-foreground"
+          className="flex items-center gap-1.5 hover:underline"
           aria-label="View source code on GitHub"
         >
-          Source code
+          <GitHub/>
+          <span className="text-sm text-muted-foreground">
+            Source code
+          </span>
         </a>
       </div>
     </footer>
