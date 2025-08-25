@@ -20,13 +20,7 @@ export default function Analysis() {
 
   const { isEmpty } = useCourse()
 
-  if (isEmpty) {
-    return (
-      <div className=" border rounded-2xl">
-        <NoUnits/>
-      </div>
-    )
-  }
+  if (isEmpty) return <NoUnits/>
 
   return (
     <div className="flex gap-6">

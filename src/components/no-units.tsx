@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 
 export default function NoUnits() {
   return (
-    <div className="flex flex-col items-center justify-center py-12">
+    <div className="flex flex-col items-center justify-center px-4 py-12 border rounded-2xl">
       <BookOpen className="w-12 h-12 mb-4 text-muted-foreground"/>
       <h3 className="text-lg font-medium mb-2">
         No units added yet

@@ -29,13 +29,7 @@ export default function Projection() {
       : null
   ), [units, futureUnits])
 
-  if (isEmpty) {
-    return (
-      <div className="border rounded-2xl">
-        <NoUnits/>
-      </div>
-    )
-  }
+  if (isEmpty) return <NoUnits/>
 
   return (
     <div className="grid md:grid-cols-12 gap-5">
