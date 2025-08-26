@@ -8,6 +8,7 @@ import { Navbar } from '@/components/navbar'
 import Footer from '@/components/footer'
 import { Toaster } from '@/components/ui/sonner'
 import { CourseProvider } from '@/context/course-provider'
+import { Analytics } from '@vercel/analytics/next'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -71,6 +72,7 @@ export default function RootLayout({
       </div>
       <Toaster position="bottom-center"/>
     </ThemeProvider>
+    <Analytics/>
     </body>
     </html>
   )
