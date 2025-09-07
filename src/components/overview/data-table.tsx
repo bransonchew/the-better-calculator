@@ -33,15 +33,19 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Unit } from '@/lib/schemas'
-import { useId, useMemo, useState } from 'react'
+import { ChangeEvent, useId, useMemo, useRef, useState } from 'react'
 import {
+  Braces,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
   Columns2,
+  Download,
+  Import,
   Plus,
+  Sheet,
   Trash,
 } from 'lucide-react'
 import { columns } from '@/components/overview/columns'
@@ -63,9 +67,22 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { camelCaseToWords, formatDate } from '@/lib/utils'
+import { download } from '@/lib/file'
+import { toast } from 'sonner'
+import Papa from 'papaparse'
+import { z } from 'zod/v4'
+import { preprocess } from '@/context/course-provider'
+
+const fileSchema = z.file()
+  .mime(['application/json', 'text/csv'], 'Please upload a valid JSON or CSV file')
+  .max(5_242_880, 'File size must be less than 5MB')
 
 function DraggableRow({ row }: { row: Row<Unit> }) {
   const { transform, transition, setNodeRef, isDragging } = useSortable({
@@ -94,7 +111,16 @@ function DraggableRow({ row }: { row: Row<Unit> }) {
 
 export default function DataTable() {
 
-  const { units: data, setUnits: setData, removeIds, clear, lastUpdated } = useCourse()
+  // Data table states
+  const {
+    units: data,
+    setUnits: setData,
+    removeIds,
+    clear,
+    lastUpdated,
+    toJSON,
+    toCSV,
+  } = useCourse()
   const [rowSelection, setRowSelection] = useState({})
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -109,11 +135,9 @@ export default function DataTable() {
     useSensor(TouchSensor, {}),
     useSensor(KeyboardSensor, {}),
   )
-
   const dataIds = useMemo<UniqueIdentifier[]>(() => (
     data?.map(({ id }) => id) || []
   ), [data])
-
   const table = useReactTable({
     data,
     columns,
@@ -138,6 +162,9 @@ export default function DataTable() {
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
   })
+
+  // Hidden file input ref
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
@@ -164,10 +191,72 @@ export default function DataTable() {
     table.resetRowSelection()
   }
 
+  function exportJSON() {
+    download(toJSON(), 'units.json', 'application/json')
+  }
+
+  function exportCSV() {
+    download(toCSV(), 'units.csv', 'text/csv')
+  }
+
+  function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
+
+    // No file selected
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Reset the input value to allow re-uploading the same file
+    e.target.value = ''
+
+    // Validate the file
+    const { error } = fileSchema.safeParse(file)
+    if (error) {
+      error.issues.forEach((issue, index, array) => {
+        toast.error(issue.message, {
+          duration: (array.length - index) * 4000,  // Stack toasts
+          closeButton: true,
+        })
+      })
+      return
+    }
+
+    // Read the file content
+    const reader = new FileReader()
+    reader.onload = () => {
+      if (file.type === 'application/json') {
+        try {
+          const data = JSON.parse(reader.result as string)
+          setData(preprocess(data))
+          toast.success('Data imported successfully')
+        } catch (e) {
+          console.error(e)
+          toast.error('Failed to parse JSON. Please check the file content.')
+        }
+      } else if (file.type === 'text/csv') {
+        const { data, errors } = Papa.parse(reader.result as string, {
+          header: true,
+          dynamicTyping: true,
+          skipEmptyLines: true,
+        })
+        if (!errors.length) {
+          setData(preprocess(data as Unit[]))
+          toast.success('Data imported successfully')
+        } else {
+          toast.error('Failed to parse CSV. Please check the file content.')
+        }
+      }
+    }
+    reader.onerror = () => {
+      toast.error('Failed to read file. Try again.')
+    }
+    reader.readAsText(file)
+  }
+
   return (
     <div className="relative flex flex-col gap-4 overflow-auto">
 
-      <div className="flex items-baseline justify-between -mb-1">
+      {/*Table actions*/ }
+      <div className="flex items-center justify-between -mb-1">
         <div className="flex items-center gap-3.5">
           <h1 className="text-2xl font-bold">Your Units</h1>
           { lastUpdated &&
@@ -186,75 +275,134 @@ export default function DataTable() {
               </p> }
         </div>
         <div className="flex items-center gap-2">
-          { (table.getIsSomeRowsSelected() || table.getIsAllPageRowsSelected()) && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm">
-                  <Trash/> Delete
+
+          {/*Delete units*/ }
+          <div>
+            { (table.getIsSomeRowsSelected() || table.getIsAllPageRowsSelected()) && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm">
+                    <Trash/>
+                    <span className="hidden sm:inline">Delete</span>
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Delete { table.getFilteredSelectedRowModel().rows.length } unit(s)?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={ handleDelete }>
+                      Continue
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            ) }
+          </div>
+
+          {/*File operations*/ }
+          <div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Download/>
+                  <ChevronDown/>
                 </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    Delete { table.getFilteredSelectedRowModel().rows.length } unit(s)?
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={ handleDelete }>
-                    Continue
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          ) }
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Columns2/>
-                <span className="hidden lg:inline">Customize Columns</span>
-                <span className="lg:hidden">Columns</span>
-                <ChevronDown/>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              { table
-                .getAllColumns()
-                .filter(
-                  (column) =>
-                    typeof column.accessorFn !== 'undefined' &&
-                    column.getCanHide(),
-                )
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={ column.id }
-                      className="capitalize"
-                      checked={ column.getIsVisible() }
-                      onCheckedChange={ (value) =>
-                        column.toggleVisibility(value)
-                      }
-                    >
-                      { camelCaseToWords(column.id) }
-                    </DropdownMenuCheckboxItem>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>Export As</DropdownMenuLabel>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={ exportJSON }>
+                    <Braces/> JSON
+                    <div className="ml-auto text-xs text-muted-foreground">
+                      Best overall
+                    </div>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={ exportCSV }>
+                    <Sheet/> CSV
+                    <div className="ml-auto text-xs text-muted-foreground">
+                      For Excel
+                    </div>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator/>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={ () => fileInputRef.current?.click() }>
+                    <Import/> Import
+                    <div className="ml-auto text-xs text-muted-foreground">
+                      *.csv / json
+                    </div>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <input
+              ref={ fileInputRef }
+              type="file"
+              className="hidden"
+              onChange={ handleFileChange }
+            />
+          </div>
+
+          {/*Customize columns*/ }
+          <div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Columns2/>
+                  <span className="hidden lg:inline">Customize Columns</span>
+                  <span className="hidden sm:inline lg:hidden">Columns</span>
+                  <ChevronDown/>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                { table
+                  .getAllColumns()
+                  .filter(
+                    (column) =>
+                      typeof column.accessorFn !== 'undefined' &&
+                      column.getCanHide(),
                   )
-                }) }
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <UnitForm
-            trigger={
-              <Button variant="outline" size="sm">
-                <Plus/>
-                <span className="hidden lg:inline">Add unit</span>
-              </Button>
-            }
-          />
+                  .map((column) => {
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={ column.id }
+                        className="capitalize"
+                        checked={ column.getIsVisible() }
+                        onCheckedChange={ (value) =>
+                          column.toggleVisibility(value)
+                        }
+                      >
+                        { camelCaseToWords(column.id) }
+                      </DropdownMenuCheckboxItem>
+                    )
+                  }) }
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          {/*Add unit*/ }
+          <div>
+            <UnitForm
+              trigger={
+                <Button variant="outline" size="sm">
+                  <Plus/>
+                  <span className="hidden sm:inline">Add unit</span>
+                </Button>
+              }
+            />
+          </div>
+
         </div>
       </div>
 
+      {/*Table content*/ }
       { table.getRowModel().rows?.length
         ?
         <div className="overflow-hidden rounded-lg border">
@@ -300,6 +448,7 @@ export default function DataTable() {
         :
         <NoUnits/> }
 
+      {/*Pagination*/ }
       <div className="flex items-center justify-between px-4">
         <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
           { table.getFilteredSelectedRowModel().rows.length } of{ ' ' }

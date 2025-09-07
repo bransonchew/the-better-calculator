@@ -5,6 +5,11 @@ import { RawUnit, unit, Unit } from '@/lib/schemas'
 import { calcMetrics, calcMetricsOverTime, Metrics, MetricsOverTime } from '@/lib/calculations'
 import { generateUUID } from '@/lib/utils'
 import { useLocalStorage } from 'usehooks-ts'
+import Papa from 'papaparse'
+
+const noop = () => {
+  // No operation
+}
 
 type Course = {
   units: Unit[],
@@ -19,61 +24,53 @@ type Course = {
   remove: (id: string) => void,
   removeIds: (ids: string[]) => void,
   clear: () => void,
+  toJSON: () => string,
+  toCSV: () => string,
 }
 
 export const CourseContext = createContext<Course>({
   units: [],
-  metrics: {
-    wam: 0, gpa: 0, cgpa: 0, totalCP: 0,
-  },
+  metrics: { wam: 0, gpa: 0, cgpa: 0, totalCP: 0 },
   metricsOverTime: [],
   isEmpty: true,
-  setUnits: () => {
-  },
-  insert: () => {
-  },
-  insertAt: () => {
-  },
-  update: () => {
-  },
-  remove: () => {
-  },
-  removeIds: () => {
-  },
-  clear: () => {
-  },
+  setUnits: noop,
+  insert: noop,
+  insertAt: noop,
+  update: noop,
+  remove: noop,
+  removeIds: noop,
+  clear: noop,
+  toJSON: () => '',
+  toCSV: () => '',
 })
+
+export const preprocess = (arr: Unit[]) => {
+  // Reject non-arrays
+  if (!Array.isArray(arr) || !arr.length) return []
+
+  // Parse units & add UUID if none
+  return arr.reduce<Unit[]>((acc, curr) => {
+    const { success, data } = unit.safeParse(curr.id ? curr : {
+      ...curr,
+      id: generateUUID(),
+    })
+    if (success) acc.push(data)  // Reject invalid units
+    return acc
+  }, [])
+}
 
 export function CourseProvider({ children }: { children: ReactNode }) {
 
   // Client-side storage
   const [units, setData] = useLocalStorage<Unit[]>('units', [], {
-    deserializer: value => {
-      const arr = JSON.parse(value) as Unit[]
-
-      // Reject non-arrays
-      if (!Array.isArray(arr) || !arr.length) return []
-
-      // Parse units & add UUID if none
-      return arr.reduce<Unit[]>((acc, curr) => {
-        const { success, data } = unit.safeParse(curr.id ? curr : {
-          ...curr,
-          id: generateUUID(),
-        })
-
-        // Reject invalid units
-        if (success) acc.push(data)
-
-        return acc
-      }, [])
-    },
+    deserializer: value => preprocess(JSON.parse(value) as Unit[]),
   })
   const [lastUpdated, setLastUpdated] = useLocalStorage<number | undefined>('last-updated', undefined)
 
-  // Flags
+  // Flag
   const isEmpty = useMemo(() => units.length === 0, [units.length])
 
-  // Update metrics
+  // Academic metrics
   const { metrics, metricsOverTime } = useMemo(() => ({
     metrics: calcMetrics(units),
     metricsOverTime: calcMetricsOverTime(units),
@@ -114,12 +111,23 @@ export function CourseProvider({ children }: { children: ReactNode }) {
     setUnits(() => [])
   }
 
+  const toJSON = () => JSON.stringify(units, (key, value) => (
+    key === 'id' ? undefined : value
+  ), 2)
+
+  const toCSV = () => Papa.unparse(units, {
+    header: true,
+    skipEmptyLines: true,
+    columns: ['code', 'name', 'creditPoint', 'mark', 'semester', 'year'],
+  })
+
   return (
     <CourseContext.Provider
       value={ {
         units, setUnits,
         metrics, metricsOverTime, lastUpdated, isEmpty,
         insert, insertAt, update, remove, removeIds, clear,
+        toJSON, toCSV,
       } }
     >
       { children }

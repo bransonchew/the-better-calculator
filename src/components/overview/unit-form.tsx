@@ -48,6 +48,7 @@ const gradeString = (mark: number) => {
     const grade = getGrade(mark)
     return `${ grade.title } (${ grade.code })`
   } catch (e) {
+    console.error(e)
     return 'N/A'
   }
 }
