@@ -1,4 +1,4 @@
-import { ModeToggle } from '@/components/mode-toggler'
+import ModeToggle from '@/components/mode-toggler'
 import { Badge } from '@/components/ui/badge'
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
