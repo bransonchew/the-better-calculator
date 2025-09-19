@@ -42,9 +42,9 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Columns2,
-  Download,
   Import,
   Plus,
+  Save,
   Sheet,
   Trash,
 } from 'lucide-react'
@@ -277,7 +277,7 @@ export default function DataTable() {
         <div className="flex items-center gap-2">
 
           {/*Delete units*/ }
-          <div>
+          <>
             { (table.getIsSomeRowsSelected() || table.getIsAllPageRowsSelected()) && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
@@ -304,19 +304,20 @@ export default function DataTable() {
                 </AlertDialogContent>
               </AlertDialog>
             ) }
-          </div>
+          </>
 
           {/*File operations*/ }
-          <div>
+          <>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
-                  <Download/>
+                  <Save/>
+                  <span className="hidden sm:inline">Save</span>
                   <ChevronDown/>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>Export As</DropdownMenuLabel>
+                <DropdownMenuLabel>Save As</DropdownMenuLabel>
                 <DropdownMenuGroup>
                   <DropdownMenuItem onClick={ exportJSON }>
                     <Braces/> JSON
@@ -348,10 +349,10 @@ export default function DataTable() {
               className="hidden"
               onChange={ handleFileChange }
             />
-          </div>
+          </>
 
           {/*Customize columns*/ }
-          <div>
+          <>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
@@ -385,10 +386,10 @@ export default function DataTable() {
                   }) }
               </DropdownMenuContent>
             </DropdownMenu>
-          </div>
+          </>
 
           {/*Add unit*/ }
-          <div>
+          <>
             <UnitForm
               trigger={
                 <Button variant="outline" size="sm">
@@ -397,7 +398,7 @@ export default function DataTable() {
                 </Button>
               }
             />
-          </div>
+          </>
 
         </div>
       </div>
