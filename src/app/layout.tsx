@@ -22,7 +22,10 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'The Better Calculator',
+  title: {
+    default: 'The Better Calculator',
+    template: '%s | The Better Calculator',
+  },
   description: 'The Better Calculator gives you a clear overview of GPA, WAM, credit points, and honours progress — all in one simple dashboard.',
   openGraph: {
     title: 'The Better Calculator | GPA & WAM Dashboard',

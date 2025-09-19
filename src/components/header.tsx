@@ -1,4 +1,4 @@
-import { ModeToggle } from '@/components/mode-toggler'
+import ModeToggle from '@/components/mode-toggler'
 import { Badge } from '@/components/ui/badge'
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
@@ -23,7 +23,7 @@ export default function Header() {
             Start tracking your results with ease 📊.
           </p>
           <p>
-            🔒 Your data stays with you. No account required.
+            🔒 Your data stays with you. No account needed.
           </p>
         </div>
         <Badge variant="secondary" className="mt-5" asChild>
