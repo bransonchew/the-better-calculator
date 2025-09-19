@@ -320,13 +320,13 @@ export default function DataTable() {
                 <DropdownMenuLabel>Save As</DropdownMenuLabel>
                 <DropdownMenuGroup>
                   <DropdownMenuItem onClick={ exportJSON }>
-                    <Braces/> JSON
+                    <Braces/> units.json
                     <div className="ml-auto text-xs text-muted-foreground">
                       Best overall
                     </div>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={ exportCSV }>
-                    <Sheet/> CSV
+                    <Sheet/> units.csv
                     <div className="ml-auto text-xs text-muted-foreground">
                       For Excel
                     </div>
