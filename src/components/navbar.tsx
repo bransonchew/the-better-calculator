@@ -19,7 +19,7 @@ export function Navbar() {
           key={ link.href }
           href={ link.href }
           className={ cn(
-            'text-base transition-colors hover:text-foreground text-muted-foreground',
+            'text-base transition-colors hover:text-foreground hover:font-medium text-muted-foreground',
             pathname === link.href && 'text-foreground font-medium',
           ) }
         >
