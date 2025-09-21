@@ -29,9 +29,9 @@ export default function Footer() {
               About
             </Link>
             <span>•</span>
-            <span>
-            © { new Date().getFullYear() } The Better Calculator
-          </span>
+            <Link href="/" className="hover:underline underline-offset-4">
+              © { new Date().getFullYear() } The Better Calculator
+            </Link>
           </div>
         </div>
 

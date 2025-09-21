@@ -146,8 +146,17 @@ export default function Page() {
               </p>
               <p>
                 While I strive to keep The Better Calculator accurate and
-                up-to-date, it’s always a good idea to double-check calculations with
-                official university resources. If you spot any issues or have suggestions,
+                up-to-date, it’s always a good idea to double-check calculations with { ' ' }
+                <Link
+                  href="https://www.monash.edu/students/admin/assessments/results/gpa"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="View source code on GitHub"
+                  className="font-bold hover:underline underline-offset-4 dark:text-amber-500"
+                >
+                  official university resources
+                </Link>
+                .{ ' ' } If you spot any issues or have suggestions,
                 please feel free to reach out via the GitHub repository!
               </p>
             </section>
