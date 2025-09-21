@@ -59,20 +59,20 @@ export default function Page() {
           <div className="space-y-10 leading-relaxed">
 
             {/* Who Made This */ }
-            <section className="space-y-3">
+            <section className="space-y-3 text-justify">
               <h2 className="text-xl font-semibold">‍🧑‍💻 Who Made This</h2>
               <p>
-                Hi, I’m Branson Chew, the developer behind The Better Calculator.
-                I’m a software enthusiast who enjoys building practical tools that make
-                everyday tasks simpler. Beyond code, I’m passionate about solving real-world
-                problems, experimenting with UI/UX, and sharing projects openly with the
-                community.
+                Hi, I’m Branson Chew, the developer behind <strong>The Better Calculator</strong>.
+                👋 I’m a software enthusiast who enjoys building practical tools that make
+                everyday tasks simpler. 💫 I’m passionate about solving real-world problems
+                through software 🛠️, experimenting with UI/UX 🎨, and sharing projects openly
+                with the community 🌐.
               </p>
             </section>
 
             {/* Why This App */ }
-            <section className="space-y-3">
-              <h2 className="text-xl font-semibold">🎓 Why This App</h2>
+            <section className="space-y-3 text-justify">
+              <h2 className="text-xl font-semibold">🧮 Why This App</h2>
               <p>
                 This project was created to help { ' ' }
                 <Link
@@ -87,7 +87,7 @@ export default function Page() {
                 { ' ' } students manage and understand their academic performance more clearly.
               </p>
               <ul className="list-disc pl-6 space-y-1">
-                <li>The official systems can feel clunky or limited.</li>
+                <li>The official systems can feel clunky or limited. 🫤</li>
                 <li>
                   Many students want a simple, visual way to track grades, calculate GPA/WAM,
                   and project outcomes.
@@ -100,24 +100,11 @@ export default function Page() {
             </section>
 
             {/* Key Designs */ }
-            <section className="space-y-3">
+            <section className="space-y-3 text-justify">
               <h2 className="text-xl font-semibold">💡 Key Designs</h2>
               <ul className="list-disc pl-6 space-y-2">
                 <li>
-                  <strong>No Accounts Needed:</strong> Everything stays on your device,
-                  keeping things private and simple.
-                </li>
-                <li>
-                  <strong>Fully Client-Side:</strong> All data is stored locally in your
-                  browser. Nothing is uploaded or tracked.
-                </li>
-                <li>
-                  <strong>Save/Import Data:</strong> Save your data and load it back anytime
-                  with the built-in <em>Save As</em> and <em>Import</em> features.
-                </li>
-                <li>
-                  <strong>Free & Open Source:</strong> The project is free to use and open to
-                  contributions at { ' ' }
+                  <strong>Free & Open Source:</strong> This project is open-source on { ' ' }
                   <Link
                     href="https://github.com/bransonchew/the-better-calculator"
                     target="_blank"
@@ -127,7 +114,19 @@ export default function Page() {
                   >
                     GitHub
                   </Link>
-                  .
+                  ,{ ' ' } so anyone can explore, use freely. 🌟
+                </li>
+                <li>
+                  <strong>No Accounts Needed:</strong> Everything stays on your device 🔒,
+                  keeping things private and simple.
+                </li>
+                <li>
+                  <strong>Fully Client-Side:</strong> All data is stored locally in your
+                  browser. Nothing is uploaded or tracked.
+                </li>
+                <li>
+                  <strong>Save/Import Data:</strong> Save your data and load it back anytime
+                  with the in-app file features 📁.
                 </li>
                 <li>
                   <strong>Responsive by Design:</strong> Whether you’re on mobile 📱 or
@@ -137,7 +136,7 @@ export default function Page() {
             </section>
 
             {/* Note */ }
-            <section className="space-y-3">
+            <section className="space-y-3 text-justify">
               <h2 className="text-xl font-semibold">🌍 A Note</h2>
               <p>
                 The Better Calculator is <em>NOT affiliated with Monash
@@ -157,7 +156,21 @@ export default function Page() {
                   official university resources
                 </Link>
                 .{ ' ' } If you spot any issues or have suggestions,
-                please feel free to reach out via the GitHub repository!
+                please feel free to contribute and suggest improvements on GitHub!
+              </p>
+              <p>
+                Check out { ' ' }
+                <Link
+                  href="https://tbh.lachlanmacphee.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="View source code on GitHub"
+                  className="font-bold hover:underline underline-offset-4 dark:text-amber-500"
+                >
+                  The Better Handbook
+                </Link>
+                ! 🙌 Created by another Monash student, sharing a similar goal of making
+                student life easier, and the inspiration for this app’s name.
               </p>
             </section>
 
