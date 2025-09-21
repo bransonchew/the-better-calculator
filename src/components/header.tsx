@@ -2,12 +2,16 @@ import ModeToggle from '@/components/mode-toggler'
 import { Badge } from '@/components/ui/badge'
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import ShareDialog from '@/components/share-dialog'
 
 export default function Header() {
   return (
     <header className="pt-16 md:pt-20 lg:pt-24 pb-2">
       <div className="absolute right-3 top-3 lg:right-6 lg:top-6">
-        <ModeToggle/>
+        <div className="flex items-center gap-3">
+          <ModeToggle/>
+          <ShareDialog/>
+        </div>
       </div>
       <div className="flex flex-col items-center">
         <Link href="/">
