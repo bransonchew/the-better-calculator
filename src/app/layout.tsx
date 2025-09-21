@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     default: 'The Better Calculator',
     template: '%s | The Better Calculator',
   },
-  description: 'The Better Calculator gives you a clear overview of GPA, WAM, credit points, and honours progress — all in one simple dashboard.',
+  description: 'The Better Calculator gives Monash University students a clear overview of GPA, WAM, credit points, and honours progress — all in one simple dashboard.',
   openGraph: {
     title: 'The Better Calculator | GPA & WAM Dashboard',
     description: 'Monitor GPA and WAM, spot trends, and plan future performance. Stay on top of your performance at a glance.',
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'The Better Calculator | GPA & WAM Dashboard',
-    description: 'Monitor GPA and WAM, spot trends, and plan future performance — all in one place. Stay on top of your performance at a glance.',
+    description: 'Monitor GPA and WAM, spot trends, and plan future performance. Stay on top of your performance at a glance.',
     images: [`${ process.env.NEXT_PUBLIC_BLOB_STORAGE_URL }/assets/opengraph-image.jpeg`],
   },
 }
