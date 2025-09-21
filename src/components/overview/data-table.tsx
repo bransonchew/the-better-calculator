@@ -118,6 +118,7 @@ export default function DataTable() {
     removeIds,
     clear,
     lastUpdated,
+    isEmpty,
     toJSON,
     toCSV,
   } = useCourse()
@@ -252,6 +253,11 @@ export default function DataTable() {
     reader.readAsText(file)
   }
 
+  function clearData() {
+    window.localStorage.clear()
+    window.location.reload()
+  }
+
   return (
     <div className="relative flex flex-col gap-4 overflow-auto">
 
@@ -306,43 +312,69 @@ export default function DataTable() {
             ) }
           </>
 
-          {/*File operations*/ }
+          {/*Data operations*/ }
           <>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <Save/>
-                  <span className="hidden sm:inline">Save</span>
-                  <ChevronDown/>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>Save As</DropdownMenuLabel>
-                <DropdownMenuGroup>
-                  <DropdownMenuItem onClick={ exportJSON }>
-                    <Braces/> units.json
-                    <div className="ml-auto text-xs text-muted-foreground">
-                      Best overall
-                    </div>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={ exportCSV }>
-                    <Sheet/> units.csv
-                    <div className="ml-auto text-xs text-muted-foreground">
-                      For Excel
-                    </div>
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator/>
-                <DropdownMenuGroup>
-                  <DropdownMenuItem onClick={ () => fileInputRef.current?.click() }>
-                    <Import/> Import
-                    <div className="ml-auto text-xs text-muted-foreground">
-                      *.csv / json
-                    </div>
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <AlertDialog>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Save/>
+                    <span className="hidden sm:inline">
+                      { isEmpty ? 'Import' : 'Save' }
+                    </span>
+                    <ChevronDown/>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>Import</DropdownMenuLabel>
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem onClick={ () => fileInputRef.current?.click() }>
+                      <Import/> Local File
+                      <div className="ml-auto text-xs text-muted-foreground">
+                        *.csv / json
+                      </div>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator/>
+                  <DropdownMenuLabel>Save As</DropdownMenuLabel>
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem disabled={ isEmpty } onClick={ exportJSON }>
+                      <Braces/> units.json
+                      <div className="ml-auto text-xs text-muted-foreground">
+                        Best overall
+                      </div>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem disabled={ isEmpty } onClick={ exportCSV }>
+                      <Sheet/> units.csv
+                      <div className="ml-auto text-xs text-muted-foreground">
+                        For Excel
+                      </div>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator/>
+                  <AlertDialogTrigger asChild>
+                    <DropdownMenuItem variant="destructive">
+                      <Trash/> Clear My Data
+                    </DropdownMenuItem>
+                  </AlertDialogTrigger>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    All your app data in this browser will be deleted.
+                    This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={ clearData }>
+                    Continue
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             <input
               ref={ fileInputRef }
               type="file"
@@ -404,50 +436,52 @@ export default function DataTable() {
       </div>
 
       {/*Table content*/ }
-      { table.getRowModel().rows?.length
-        ?
-        <div className="overflow-hidden rounded-lg border">
-          <DndContext
-            collisionDetection={ closestCenter }
-            modifiers={ [restrictToVerticalAxis] }
-            onDragEnd={ handleDragEnd }
-            sensors={ sensors }
-            id={ sortableId }
-          >
-            <Table>
-              <TableHeader className="bg-muted sticky top-0 z-10">
-                { table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={ headerGroup.id }>
-                    { headerGroup.headers.map((header) => {
-                      return (
-                        <TableHead key={ header.id } colSpan={ header.colSpan }>
-                          { header.isPlaceholder
-                            ? null
-                            : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext(),
-                            ) }
-                        </TableHead>
-                      )
-                    }) }
-                  </TableRow>
-                )) }
-              </TableHeader>
-              <TableBody className="**:data-[slot=table-cell]:first:w-8">
-                <SortableContext
-                  items={ dataIds }
-                  strategy={ verticalListSortingStrategy }
-                >
-                  { table.getRowModel().rows.map((row) => (
-                    <DraggableRow key={ row.id } row={ row }/>
+      <>
+        { table.getRowModel().rows?.length
+          ?
+          <div className="overflow-hidden rounded-lg border">
+            <DndContext
+              collisionDetection={ closestCenter }
+              modifiers={ [restrictToVerticalAxis] }
+              onDragEnd={ handleDragEnd }
+              sensors={ sensors }
+              id={ sortableId }
+            >
+              <Table>
+                <TableHeader className="bg-muted sticky top-0 z-10">
+                  { table.getHeaderGroups().map((headerGroup) => (
+                    <TableRow key={ headerGroup.id }>
+                      { headerGroup.headers.map((header) => {
+                        return (
+                          <TableHead key={ header.id } colSpan={ header.colSpan }>
+                            { header.isPlaceholder
+                              ? null
+                              : flexRender(
+                                header.column.columnDef.header,
+                                header.getContext(),
+                              ) }
+                          </TableHead>
+                        )
+                      }) }
+                    </TableRow>
                   )) }
-                </SortableContext>
-              </TableBody>
-            </Table>
-          </DndContext>
-        </div>
-        :
-        <NoUnits/> }
+                </TableHeader>
+                <TableBody className="**:data-[slot=table-cell]:first:w-8">
+                  <SortableContext
+                    items={ dataIds }
+                    strategy={ verticalListSortingStrategy }
+                  >
+                    { table.getRowModel().rows.map((row) => (
+                      <DraggableRow key={ row.id } row={ row }/>
+                    )) }
+                  </SortableContext>
+                </TableBody>
+              </Table>
+            </DndContext>
+          </div>
+          :
+          <NoUnits/> }
+      </>
 
       {/*Pagination*/ }
       <div className="flex items-center justify-between px-4">

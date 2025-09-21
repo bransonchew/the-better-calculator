@@ -90,11 +90,11 @@ export default function Page() {
                 <li>The official systems can feel clunky or limited. 🫤</li>
                 <li>
                   Many students want a simple, visual way to track grades, calculate GPA/WAM,
-                  and project outcomes.
+                  and project outcomes. 📊
                 </li>
                 <li>
                   The Better Calculator exists to make those tasks quick,
-                  accessible, and intuitive — no sign-ins, no hassle.
+                  accessible, and intuitive — no sign-ins, no hassle. 👌
                 </li>
               </ul>
             </section>
@@ -122,7 +122,7 @@ export default function Page() {
                 </li>
                 <li>
                   <strong>Fully Client-Side:</strong> All data is stored locally in your
-                  browser. Nothing is uploaded or tracked.
+                  browser. You have full control over your data. 🛡️
                 </li>
                 <li>
                   <strong>Save/Import Data:</strong> Save your data and load it back anytime
